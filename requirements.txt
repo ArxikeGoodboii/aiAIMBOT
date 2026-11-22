@@ -1,4 +1,4 @@
-ultralytics==8.2.111
+ultralytics==8.2.103
 mss==9.0.1
 pywin32==306
 opencv-python-headless==4.10.0.84
