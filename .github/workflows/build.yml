@@ -5,37 +5,59 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
-        shell: pwsh
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt pyinstaller==6.6.0
-          python -c "import ultralytics, cv2, mss, screeninfo; print('Imports OK')"
-      - name: Download YOLOv8n fallback weights
-        shell: pwsh
+          pip install --upgrade pip
+          pip install ultralytics==8.2.103
+          pip install mss==9.0.1 pywin32==306 opencv-python-headless==4.10.0.84 numpy==1.26.4 screeninfo==0.8.1
+          pip install pyinstaller==6.6.0
+
+      - name: Download YOLOv8n weights
         run: |
           python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
-      - name: Build EXE
-        shell: pwsh
+
+      - name: Copy weights to src
         run: |
-          pyinstaller --noconfirm --clean --onefile --console --name rivals-aimbot --add-data "yolov8n.pt;." --collect-all ultralytics --collect-all cv2 --collect-all mss --collect-all screeninfo --hidden-import win32api --hidden-import win32con --hidden-import overlay src/main.py
+          copy yolov8n.pt src\yolov8n.pt
+
+      - name: Build
+        run: |
+          pyinstaller `
+            --onedir `
+            --noconsole `
+            --name rivals-aimbot `
+            --add-data "src\yolov8n.pt;." `
+            --collect-all torchvision `
+            --collect-all torch `
+            --collect-all ultralytics `
+            --hidden-import torchvision `
+            --hidden-import torchvision.ops `
+            --hidden-import win32api `
+            --hidden-import win32con `
+            --hidden-import screeninfo `
+            --hidden-import tkinter `
+            src\main.py
+
+      - name: Zip output folder
+        run: |
+          Compress-Archive -Path dist\rivals-aimbot\* -DestinationPath dist\rivals-aimbot-dist.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: rivals-aimbot-exe
-          path: dist/rivals-aimbot.exe
-          if-no-files-found: error
+          path: dist\rivals-aimbot-dist.zip
           retention-days: 7
