@@ -1,16 +1,15 @@
-# aimbot
+# Roblox Rivals — Windows build
 
-YOLOv8 screen-scan project. GitHub Actions builds a Windows executable.
+GitHub Actions builds this project as a Windows executable.
 
-## Build
+## Download
+Open the Actions tab, select the latest successful build-rivals-aimbot run, and download the rivals-aimbot-exe artifact. Extract the ZIP to get rivals-aimbot.exe.
 
-Push to `main`, or run **Build Windows EXE** manually from the Actions tab. The output is uploaded as the `aimbot-exe` artifact.
+## Model note
+The build bundles the generic yolov8n.pt fallback. For Roblox character detection, a compatible custom roblox.pt model should be placed beside the executable. The generic fallback is not trained specifically for Roblox Rivals, so it may not identify game characters reliably.
 
 ## Controls
+- INSERT: toggle on/off
+- Hold right mouse button: activate the aiming loop while enabled
 
-- `INSERT`: toggle the application on/off
-- Hold right mouse button while enabled to activate its screen-targeting behavior
-
-## Configuration
-
-Edit the constants at the top of `aimbot/main.py`. The build downloads the standard YOLOv8n model weights during the workflow; the weights are not committed to the repository.
+The HUD is configured for monitor 2 and falls back to the last available monitor.
